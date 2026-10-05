@@ -216,7 +216,7 @@ export class YawAlignApp extends LitElement {
   }
 
   private get isWriter() {
-    return true; /* h02-trap-form */
+    return this.session?.role === "writer";
   }
 
   private async submitLog() {
