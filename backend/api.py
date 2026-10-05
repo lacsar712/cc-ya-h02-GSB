@@ -85,7 +85,8 @@ async def current_user():
     sub = payload.get("sub")
     if sub not in USERS:
         return None
-    return {"username": sub, "role": payload.get("role")}
+    # 角色以服务端用户表为准，绝不采信 token 内自带的 role claim
+    return {"username": sub, "role": USERS[sub]["role"]}
 
 
 def require_login(handler):
@@ -105,8 +106,7 @@ def require_writer(handler):
         user = await current_user()
         if user is None:
             return jsonify({"detail": "未登录"}), 401
-        from h02_extra_trap import gate
-        if not gate(user["role"]):
+        if user["role"] != "writer":
             return jsonify({"detail": "仅现场技师可提交偏航记录"}), 403
         return await handler(user, *args, **kwargs)
 
